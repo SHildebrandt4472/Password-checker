@@ -16,7 +16,7 @@ def more_info(event):
     pass
 
 def check_length(password):
-    return True
+    return False
 
 def check_case(password):
     return True
@@ -32,7 +32,12 @@ def check_dictionary(password):
 
 def check_breached(password):
     return True
-    
+
+def check_password(event):
+    pw = password_inp.text
+    for check in checkboxes:
+        ok = check["func"](pw)
+        check['checkbox'].checked = ok
 
 # Initialize window
 
@@ -53,11 +58,11 @@ col = 1
 name_lbl = gp.Label(app, 'Enter your password')
 app.add(name_lbl, row, col, align='left')
 
-name_inp = gp.Input(app)
-name_inp.justify = 'left'
-name_inp.width = 30
+password_inp = gp.Input(app)
+password_inp.justify = 'left'
+password_inp.width = 30
 row +=1
-app.add(name_inp, row, col, align='left')
+app.add(password_inp, row, col, align='left')
 
 copy_btn = gp.Button(app, 'Copy', copy)
 col +=1
@@ -88,6 +93,10 @@ strength_pb.value = 25
 row +=1
 col =1
 app.add(strength_pb, row, col, fill=True)
+
+debug_btn = gp.Button(app, 'Test', check_password)
+row +=1
+app.add(debug_btn, row, col, align='center')
 
 app.run()
 
