@@ -47,7 +47,7 @@ checkboxes = [
     {'text': "Contains numbers",                     'func': check_num,        'score': 10},
     {'text': "Contains symbols",                     'func': check_symbol,     'score': 10},
     {'text': "Dosn't contain dictionary words",      'func': check_dictionary, 'score': 10},
-    {'text': "Already breached password",            'func': check_breached,   'score': 10},    
+    {'text': "Already breached password",            'func': check_breached,   'score': 10},   
 ]
 
 app.set_grid(6+len(checkboxes), 2)
