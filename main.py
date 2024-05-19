@@ -37,22 +37,32 @@ def check_breached(password):
 
 def check_password(event):
     pw = password_inp.text
-    for check in checkboxes:
-        ok = check["func"](pw)
-        check['checkbox'].checked = ok
+    for test in password_tests:
+        ok = test.func(pw)
+        test.checkbox.checked = ok
+
+
+class PasswordTest:
+    def __init__(self, text, func, score):
+        self.text = text
+        self.func = func
+        self.score = score
+        self.checkbox = None    
+
+# Create checkboxes
+password_tests = [
+  PasswordTest("Length > 12", check_length, 10),
+  PasswordTest("Contains upper and lowercase letters", check_case, 10),
+  PasswordTest("Contains numbers", check_num, 10),
+  PasswordTest("Contains symbols", check_symbol, 10),
+  PasswordTest("Dosn't contain dictionary words", check_dictionary, 10),
+  PasswordTest("Already breached password", check_breached, 10),
+]
+
 
 # Initialize window
 
-checkboxes = [
-    {'text': "Length > 12",                          'func': check_length,     'score': 10},          # find out what
-    {'text': "Contains upper and lowercase letters", 'func': check_case,       'score': 10},
-    {'text': "Contains numbers",                     'func': check_num,        'score': 10},
-    {'text': "Contains symbols",                     'func': check_symbol,     'score': 10},
-    {'text': "Dosn't contain dictionary words",      'func': check_dictionary, 'score': 10},
-    {'text': "Already breached password",            'func': check_breached,   'score': 10},   
-]
-
-app.set_grid(6+len(checkboxes), 2)
+app.set_grid(6+len(password_tests), 2)
 
 row = 1
 col = 1
@@ -77,10 +87,10 @@ app.add(show_btn, row, col, align='left')
 
 # Create checkboxes
 
-for check in checkboxes:
-    check['checkbox'] = gp.Checkbox(app, check["text"])
+for test in password_tests:
+    test.checkbox = gp.Checkbox(app, test.text)
     row += 1
-    app.add(check['checkbox'], row, col, align='left')
+    app.add(test.checkbox, row, col, align='left')
 
 strength_lbl = gp.Label(app, '')
 row +=1
