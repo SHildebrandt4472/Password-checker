@@ -12,11 +12,13 @@ def copy(event):
     pass
 
 def reveal(event):
-    password_inp.toggle()
+    password_inp.unmask()
+
+def hide(event):
+    password_inp.mask()
 
 def more_info(event):
     pass
-
 
 def check_length_8(password):
     if len(password) >= 8:
@@ -120,8 +122,14 @@ col =1
 row +=1
 app.add(show_btn, row, col, align='left')
 
-# Create checkboxes
+show_img = gp.Image(app, 'images/eye.png')
+show_img.add_event_listener('mouse_down', reveal)
+show_img.add_event_listener('mouse_up', hide)
+col +=1
+app.add(show_img, row, col, align='center')
 
+# Create checkboxes
+col = 1
 for test in password_tests:
     test.checkbox = gp.Checkbox(app, test.text)
     row += 1
