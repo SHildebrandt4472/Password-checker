@@ -12,34 +12,68 @@ def copy(event):
     pass
 
 def reveal(event):
-    pass
+    password_inp.toggle()
 
 def more_info(event):
     pass
 
-def check_length(password):
-    return False
+
+def check_length_8(password):
+    if len(password) >= 8:
+        return True
+    else:
+        return False
+
+def check_length_12(password):
+    if len(password) >= 12:
+        return True
+    else:
+        return False
 
 def check_case(password):
-    return True
+    upper_count = 0
+    lower_count = 0
+    for letter in password:
+        if letter >= 'A' and letter <= 'Z':
+            upper_count += 1
+        elif letter >= 'a' and letter <= 'z':
+            lower_count += 1
+
+    if upper_count >= 1 and lower_count >= 1:
+        return True
+    else:
+        return False
 
 def check_num(password):
-    return True
+    for letter in password:
+        if letter >= '0' and letter <= '9':
+            return True
+    return False
 
 def check_symbol(password):
-    return True
+    symbols = "`~!@#$%^&*()_+-=[]{}|;:,.<>?/\\\'\""
+    for letter in password:
+        if letter in symbols:
+            return True
+    return False
 
 def check_dictionary(password):
-    return True
+    return False
 
 def check_breached(password):
-    return True
+    return False
 
 def check_password(event):
     pw = password_inp.text
+    score = 0
+    score_total = 0
     for test in password_tests:
         ok = test.func(pw)
         test.checkbox.checked = ok
+        if ok:
+            score += test.score
+        score_total += test.score
+    strength_pb.value = 100/score_total * score
 
 
 class PasswordTest:
@@ -51,7 +85,8 @@ class PasswordTest:
 
 # Create checkboxes
 password_tests = [
-  PasswordTest("Length > 12", check_length, 10),
+  PasswordTest("Length >= 8", check_length_8, 5),
+  PasswordTest("Length >= 12", check_length_12, 10),
   PasswordTest("Contains upper and lowercase letters", check_case, 10),
   PasswordTest("Contains numbers", check_num, 10),
   PasswordTest("Contains symbols", check_symbol, 10),
@@ -70,7 +105,7 @@ col = 1
 name_lbl = gp.Label(app, 'Enter your password')
 app.add(name_lbl, row, col, align='left')
 
-password_inp = gp.Input(app)
+password_inp = gp.Secret(app)
 password_inp.justify = 'left'
 password_inp.width = 30
 row +=1
@@ -101,7 +136,6 @@ col +=1
 app.add(more_info_btn, row, col, align='center')
 
 strength_pb = gp.Progressbar(app)
-strength_pb.value = 25
 row +=1
 col =1
 app.add(strength_pb, row, col, fill=True)
