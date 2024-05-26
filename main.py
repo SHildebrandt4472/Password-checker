@@ -1,6 +1,8 @@
 #test changes
 
 import gooeypie as gp
+import pyhibp
+from pyhibp import pwnedpasswords as pw
 
 app = gp.GooeyPieApp('Hello!')
 
@@ -63,7 +65,19 @@ def check_dictionary(password):
     return False
 
 def check_breached(password):
-    return False
+    # Required: A descriptive user agent must be set describing the application consuming
+    #   the HIBP API
+    pyhibp.set_user_agent(ua="BasicPasswordChecker/0.0.1 (password checker)")
+
+    # Check a password to see if it has been disclosed in a public breach corpus
+    resp = pw.is_password_breached(password=password)
+    if resp:
+        print("Password breached!")
+        print("This password was used {0} time(s) before.".format(resp))
+        return True
+    else:
+        print("Password not breached!")
+        return False
 
 def check_password(event):
     pw = password_inp.text
