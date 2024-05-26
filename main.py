@@ -3,12 +3,15 @@
 import gooeypie as gp
 import pyhibp
 from pyhibp import pwnedpasswords as pw
+from dict import load_word_list, word_exists
 
 app = gp.GooeyPieApp('Hello!')
 
 app.width = 600
 app.height = 400
 app.title = "Password Checker"
+
+load_word_list()
 
 def copy(event):
     pass
@@ -62,7 +65,9 @@ def check_symbol(password):
     return False
 
 def check_dictionary(password):
-    return False
+    if word_exists(password):
+        return False
+    return True
 
 def check_breached(password):
     # Required: A descriptive user agent must be set describing the application consuming
@@ -74,10 +79,10 @@ def check_breached(password):
     if resp:
         print("Password breached!")
         print("This password was used {0} time(s) before.".format(resp))
-        return True
+        return False
     else:
         print("Password not breached!")
-        return False
+        return True
 
 def check_password(event):
     pw = password_inp.text
@@ -106,8 +111,8 @@ password_tests = [
   PasswordTest("Contains upper and lowercase letters", check_case, 10),
   PasswordTest("Contains numbers", check_num, 10),
   PasswordTest("Contains symbols", check_symbol, 10),
-  PasswordTest("Dosn't contain dictionary words", check_dictionary, 10),
-  PasswordTest("Already breached password", check_breached, 10),
+  PasswordTest("Not based on a dictionary word", check_dictionary, 10),
+  PasswordTest("Hasn't been breached", check_breached, 10),
 ]
 
 
