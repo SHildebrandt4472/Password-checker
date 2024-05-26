@@ -67,6 +67,21 @@ def check_symbol(password):
 def check_dictionary(password):
     if word_exists(password):
         return False
+    if len(password) > 3:
+        if word_exists(password[0:-1]):  # Check without last character
+            return False
+        if word_exists(password[1:]):  # Check without first character
+            return False
+    if len(password) > 4:
+        if word_exists(password[0:-2]):  # Check without last two characters
+            return False
+        if word_exists(password[2:]):  # Check without first two characters
+            return False
+    if len(password) > 5:
+        if word_exists(password[0:-3]):  # Check without last three characters
+            return False
+        if word_exists(password[3:]):  # Check without first three characters
+            return False
     return True
 
 def check_breached(password):
