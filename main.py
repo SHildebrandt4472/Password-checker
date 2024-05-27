@@ -22,6 +22,17 @@ def reveal(event):
 def hide(event):
     password_inp.mask()
 
+def show_img_click(event):
+    global password_hidden
+    if password_hidden:
+        password_hidden = False
+        password_inp.unmask()
+        show_img.image = 'images/eye open.png'
+    else:
+        password_hidden = True
+        password_inp.mask()
+        show_img.image = 'images/eye closed.png'
+
 def more_info(event):
     pass
 
@@ -141,26 +152,25 @@ col = 1
 name_lbl = gp.Label(app, 'Enter your password')
 app.add(name_lbl, row, col, align='left')
 
-password_inp = gp.Secret(app)
+password_con = gp.Container(app) 
+password_con.set_grid(1, 2)  
+password_inp = gp.Secret(password_con)
 password_inp.justify = 'left'
 password_inp.width = 30
-row +=1
-app.add(password_inp, row, col, align='left')
+row += 1
+password_con.add(password_inp, 1, 1, align='left')
+
+show_img = gp.Image(password_con, 'images/eye closed.png')
+password_hidden = True
+show_img.add_event_listener('mouse_down', show_img_click)
+
+password_con.add(show_img, 1, 2, align='center')
+
+app.add(password_con, row, col, align='left')
 
 copy_btn = gp.Button(app, 'Copy', copy)
 col +=1
 app.add(copy_btn, row, col, align='center')
-
-show_btn = gp.Button(app, 'Show password', reveal)
-col =1
-row +=1
-app.add(show_btn, row, col, align='left')
-
-show_img = gp.Image(app, 'images/eye.png')
-show_img.add_event_listener('mouse_down', reveal)
-show_img.add_event_listener('mouse_up', hide)
-col +=1
-app.add(show_img, row, col, align='center')
 
 # Create checkboxes
 col = 1
