@@ -27,11 +27,23 @@ def show_img_click(event):
     if password_hidden:
         password_hidden = False
         password_inp.unmask()
-        show_img.image = 'images/eye open.png'
+        show_img.image = 'images/eye_open.png'
     else:
         password_hidden = True
         password_inp.mask()
-        show_img.image = 'images/eye closed.png'
+        show_img.image = 'images/eye_closed.png'
+
+def show_img_hover(event):
+    if password_hidden:
+        show_img.image = 'images/eye_closed_hover.png'
+    else:
+        show_img.image = 'images/eye_open_hover.png'
+
+def show_img_mouse_out(event):
+    if password_hidden:
+        show_img.image = 'images/eye_closed.png'
+    else:
+        show_img.image = 'images/eye_open.png'
 
 def more_info(event):
     pass
@@ -160,9 +172,11 @@ password_inp.width = 30
 row += 1
 password_con.add(password_inp, 1, 1, align='left')
 
-show_img = gp.Image(password_con, 'images/eye closed.png')
+show_img = gp.Image(password_con, 'images/eye_closed.png')
 password_hidden = True
 show_img.add_event_listener('mouse_down', show_img_click)
+show_img.add_event_listener('mouse_over', show_img_hover)
+show_img.add_event_listener('mouse_out', show_img_mouse_out)
 
 password_con.add(show_img, 1, 2, align='center')
 
