@@ -13,10 +13,22 @@ app.height = 400
 app.title = "Hilda Hack"
 
 load_word_list()
+delay_timer = 0
+
+def timertick():
+    global delay_timer
+    if delay_timer > 0:
+        delay_timer -= 1
+        if delay_timer == 0:
+            check_password(None)
+
+def open_function():
+    app.set_interval(100, timertick)
 
 def copy(event):
+    if password_inp.text == '':
+        return
     pyperclip.copy(password_inp.text)
-    copy_lbl.text = 'Copied'
     copy_img.image = 'images/clipboard_tick.png'
 
 def reveal(event):
@@ -130,7 +142,12 @@ def check_password(event):
     score = 0
     score_total = 0
     for test in password_tests:
+        score_total += test.score
         if len(pw) == 0:
+            test.icon.image = 'images/dash.png'
+            continue  # Skip tests if password is empty
+
+        if test.delayed and delay_timer > 0:
             test.icon.image = 'images/dash.png'
             continue  # Skip tests if password is empty
 
@@ -140,16 +157,27 @@ def check_password(event):
             score += test.score
         else:
             test.icon.image = 'images/cross.png'
-        score_total += test.score
     strength_pb.value = 100/score_total * score
 
+def password_changed(event):
+    global delay_timer
+    delay_timer = 8 # Delay for 1 second before checking password
+    copy_img.image = 'images/clipboard.png'
+    check_password(event)
+
+def debug_1():
+    copy(None)
+
+def debug(event):
+    app.set_timeout(2000, debug_1)
 
 class PasswordTest:
-    def __init__(self, text, func, score):
+    def __init__(self, text, func, score, delayed=False):
         self.text = text
         self.func = func
         self.score = score
-        self.icon = None    
+        self.icon = None
+        self.delayed = delayed 
 
 # Create checkboxes
 password_tests = [
@@ -159,12 +187,13 @@ password_tests = [
   PasswordTest("Contains numbers", check_num, 10),
   PasswordTest("Contains symbols", check_symbol, 10),
   PasswordTest("Not based on a dictionary word", check_dictionary, 10),
-  #PasswordTest("Hasn't been breached", check_breached, 10),
+  PasswordTest("Hasn't been breached", check_breached, 10, delayed=True),
 ]
 
 
 # Initialize window
 
+app.on_open(open_function)
 app.set_grid(6+len(password_tests), 2)
 
 row = 1
@@ -173,16 +202,12 @@ col = 1
 name_lbl = gp.Label(app, 'Enter your password')
 app.add(name_lbl, row, col, align='left')
 
-copy_lbl = gp.Label(app, '')
-col +=1
-app.add(copy_lbl, row, col, align='center')
-
 password_con = gp.Container(app) 
 password_con.set_grid(1, 3)  
 password_inp = gp.Secret(password_con)
 password_inp.justify = 'left'
 password_inp.width = 30
-password_inp.add_event_listener('change', check_password)
+password_inp.add_event_listener('change', password_changed)
 col =1
 row += 1
 password_con.add(password_inp, 1, 1, align='left')
@@ -234,7 +259,7 @@ row +=1
 col =1
 app.add(strength_pb, row, col, fill=True)
 
-debug_btn = gp.Button(app, 'Test', check_password)
+debug_btn = gp.Button(app, 'Test', debug)
 row +=1
 app.add(debug_btn, row, col, align='center')
 
