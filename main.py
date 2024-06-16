@@ -8,7 +8,7 @@ import pyperclip
 
 app = gp.GooeyPieApp('Hello!')
 
-app.width = 600
+app.width = 250
 app.height = 400
 app.title = "Hilda Hack"
 
@@ -210,21 +210,19 @@ test_password_checks()
 # Initialize window
 
 app.on_open(open_function)
-app.set_grid(6+len(password_tests), 2)
+app.set_grid(6, 1)
 
 row = 1
-col = 1
 
 name_lbl = gp.Label(app, 'Enter your password')
-app.add(name_lbl, row, col, align='left')
+app.add(name_lbl, row, 1, align='left')
 
 password_con = gp.Container(app) 
-password_con.set_grid(1, 3)  
+password_con.set_grid(1, 3)
 password_inp = gp.Secret(password_con)
 password_inp.justify = 'left'
 password_inp.width = 30
 password_inp.add_event_listener('change', password_changed)
-col =1
 row += 1
 password_con.add(password_inp, 1, 1, align='left')
 
@@ -241,16 +239,11 @@ copy_img.add_event_listener('mouse_down', copy)
 
 password_con.add(copy_img, 1, 3, align='center')
 
-app.add(password_con, row, col, align='left')
-
-copy_btn = gp.Button(app, 'Copy', copy)
-col +=1
-app.add(copy_btn, row, col, align='center')
+app.add(password_con, row, 1, align='left')
 
 # Create checkboxes
 checkbox_grid = gp.Container(app) 
 checkbox_grid.set_grid(len(password_tests), 2) 
-col = 1
 r = 1
 for test in password_tests:
     test.icon = gp.Image(checkbox_grid, "images/dash.png")
@@ -260,23 +253,30 @@ for test in password_tests:
     r += 1
 
 row += 1
-app.add(checkbox_grid, row, col, align='left')
+app.add(checkbox_grid, row, 1, align='left')
 
 strength_lbl = gp.Label(app, '')
 row +=1
-app.add(strength_lbl, row, col, align='left')
+app.add(strength_lbl, row, 1, align='left')
 
-more_info_btn = gp.Button(app, 'More info', more_info)
-col +=1
-app.add(more_info_btn, row, col, align='center')
+progress_cont =gp.Container(app)
+progress_cont.set_grid(1, 2)
+progress_cont.set_column_weights(1, 0)
 
-strength_pb = gp.Progressbar(app)
+strength_pb = gp.Progressbar(progress_cont)
+#strength_pb.width = 250
+progress_cont.add(strength_pb, 1, 1, fill=True)
+
+info_img = gp.Image(progress_cont, 'images/info.png')
+info_img.add_event_listener('mouse_down', more_info)
+info_img.width = 30
+progress_cont.add(info_img, 1, 2,align='center')
+
 row +=1
-col =1
-app.add(strength_pb, row, col, fill=True)
+app.add(progress_cont, row, 1, fill=True)
 
 debug_btn = gp.Button(app, 'Test', debug)
 row +=1
-app.add(debug_btn, row, col, align='center')
+app.add(debug_btn, row, 1, align='center')
 
 app.run()
