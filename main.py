@@ -4,17 +4,20 @@ import gooeypie as gp
 import pyhibp
 from pyhibp import pwnedpasswords as pw
 from dict import load_word_list, word_exists
+import pyperclip
 
 app = gp.GooeyPieApp('Hello!')
 
 app.width = 600
 app.height = 400
-app.title = "Password Checker"
+app.title = "Hilda Hack"
 
 load_word_list()
 
 def copy(event):
-    pass
+    pyperclip.copy(password_inp.text)
+    copy_lbl.text = 'Copied'
+    copy_img.image = 'images/clipboard_tick.png'
 
 def reveal(event):
     password_inp.unmask()
@@ -27,11 +30,11 @@ def show_img_click(event):
     if password_hidden:
         password_hidden = False
         password_inp.unmask()
-        show_img.image = 'images/eye_open.png'
+        show_img.image = 'images/eye_open_hover.png'
     else:
         password_hidden = True
         password_inp.mask()
-        show_img.image = 'images/eye_closed.png'
+        show_img.image = 'images/eye_closed_hover.png'
 
 def show_img_hover(event):
     if password_hidden:
@@ -127,10 +130,16 @@ def check_password(event):
     score = 0
     score_total = 0
     for test in password_tests:
+        if len(pw) == 0:
+            test.icon.image = 'images/dash.png'
+            continue  # Skip tests if password is empty
+
         ok = test.func(pw)
-        test.checkbox.checked = ok
         if ok:
+            test.icon.image = 'images/tick.png'
             score += test.score
+        else:
+            test.icon.image = 'images/cross.png'
         score_total += test.score
     strength_pb.value = 100/score_total * score
 
@@ -140,7 +149,7 @@ class PasswordTest:
         self.text = text
         self.func = func
         self.score = score
-        self.checkbox = None    
+        self.icon = None    
 
 # Create checkboxes
 password_tests = [
@@ -150,7 +159,7 @@ password_tests = [
   PasswordTest("Contains numbers", check_num, 10),
   PasswordTest("Contains symbols", check_symbol, 10),
   PasswordTest("Not based on a dictionary word", check_dictionary, 10),
-  PasswordTest("Hasn't been breached", check_breached, 10),
+  #PasswordTest("Hasn't been breached", check_breached, 10),
 ]
 
 
@@ -164,11 +173,17 @@ col = 1
 name_lbl = gp.Label(app, 'Enter your password')
 app.add(name_lbl, row, col, align='left')
 
+copy_lbl = gp.Label(app, '')
+col +=1
+app.add(copy_lbl, row, col, align='center')
+
 password_con = gp.Container(app) 
-password_con.set_grid(1, 2)  
+password_con.set_grid(1, 3)  
 password_inp = gp.Secret(password_con)
 password_inp.justify = 'left'
 password_inp.width = 30
+password_inp.add_event_listener('change', check_password)
+col =1
 row += 1
 password_con.add(password_inp, 1, 1, align='left')
 
@@ -178,7 +193,12 @@ show_img.add_event_listener('mouse_down', show_img_click)
 show_img.add_event_listener('mouse_over', show_img_hover)
 show_img.add_event_listener('mouse_out', show_img_mouse_out)
 
-password_con.add(show_img, 1, 2, align='center')
+password_con.add(show_img, 1, 2, align='center', valign='middle')
+
+copy_img = gp.Image(password_con, 'images/clipboard.png')
+copy_img.add_event_listener('mouse_down', copy)
+
+password_con.add(copy_img, 1, 3, align='center')
 
 app.add(password_con, row, col, align='left')
 
@@ -187,11 +207,19 @@ col +=1
 app.add(copy_btn, row, col, align='center')
 
 # Create checkboxes
+checkbox_grid = gp.Container(app) 
+checkbox_grid.set_grid(len(password_tests), 2) 
 col = 1
+r = 1
 for test in password_tests:
-    test.checkbox = gp.Checkbox(app, test.text)
-    row += 1
-    app.add(test.checkbox, row, col, align='left')
+    test.icon = gp.Image(checkbox_grid, "images/dash.png")
+    label = gp.Label(checkbox_grid, test.text)
+    checkbox_grid.add(test.icon, r, 1)
+    checkbox_grid.add(label, r, 2)
+    r += 1
+
+row += 1
+app.add(checkbox_grid, row, col, align='left')
 
 strength_lbl = gp.Label(app, '')
 row +=1
@@ -211,5 +239,3 @@ row +=1
 app.add(debug_btn, row, col, align='center')
 
 app.run()
-
-# .secret
