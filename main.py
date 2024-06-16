@@ -22,8 +22,17 @@ def timertick():
         if delay_timer == 0:
             check_password(None)
 
+def test_password_checks():
+    for test in password_tests:
+        try:
+            test.func('password')
+        except:
+            test.text = test.text + ' (not supported)'
+            test.disabled = True
+
 def open_function():
     app.set_interval(100, timertick)
+    check_password(None)  # Initialize icons
 
 def copy(event):
     if password_inp.text == '':
@@ -143,13 +152,18 @@ def check_password(event):
     score_total = 0
     for test in password_tests:
         score_total += test.score
+
+        if test.disabled:
+            test.icon.image = 'images/disabled.png'
+            continue  # Skip tests if disabled
+
         if len(pw) == 0:
             test.icon.image = 'images/dash.png'
             continue  # Skip tests if password is empty
 
         if test.delayed and delay_timer > 0:
             test.icon.image = 'images/dash.png'
-            continue  # Skip tests if password is empty
+            continue  # Skip test if delayed
 
         ok = test.func(pw)
         if ok:
@@ -177,7 +191,8 @@ class PasswordTest:
         self.func = func
         self.score = score
         self.icon = None
-        self.delayed = delayed 
+        self.delayed = delayed
+        self.disabled = False 
 
 # Create checkboxes
 password_tests = [
@@ -189,6 +204,7 @@ password_tests = [
   PasswordTest("Not based on a dictionary word", check_dictionary, 10),
   PasswordTest("Hasn't been breached", check_breached, 10, delayed=True),
 ]
+test_password_checks()
 
 
 # Initialize window
