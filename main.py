@@ -98,8 +98,8 @@ def check_length_8(password):
     else:
         return False
 
-def check_length_12(password):
-    if len(password) >= 12:
+def check_length_13(password):
+    if len(password) >= 13:
         return True
     else:
         return False
@@ -166,10 +166,34 @@ def check_breached(password):
         print("Password not breached!")
         return True
 
+def brute_force_time(possibilites):
+    # 1 billion guesses per second
+    seconds = possibilites / 1000000000
+    minutes = seconds / 60
+    hours = minutes / 60
+    days = hours / 24
+    years = days / 365
+    
+    if minutes < 1:
+        return 'Instantly'
+    
+    elif hours < 1:
+        return f'{minutes:.0f} minutes'
+    elif days < 1:
+        return f'{hours:.0f} hours'
+    elif years < 1:
+        return f'{days:.0f} days'
+    elif years < 100:
+        return f'{years:.0f} years'
+    else:
+        return 'Not in your lifetime'
+
 def check_password(event):
     pw = password_inp.text
     score = 0
     score_total = 0
+    max_chars = 26
+
     for test in password_tests:
         score_total += test.score
 
@@ -189,17 +213,22 @@ def check_password(event):
         if ok:
             test.icon.image = 'images/tick.png'
             score += test.score
+            max_chars += test.char_count
         else:
             test.icon.image = 'images/cross.png'
     strength_pb.value = 100/score_total * score
+    print(strength_pb.value)
+
     if len(pw) >0:
         for desc in password_descriptions:
             if strength_pb.value <= desc.score:
                 strength_lbl.text = desc.text
                 strength_lbl.color = desc.colour
                 break
+        guesses_lbl.text = brute_force_time(max_chars ** len(pw))
     else:
         strength_lbl.text = ''
+        guesses_lbl.text = ''
 
 def password_changed(event):
     global delay_timer
@@ -214,11 +243,12 @@ def debug(event):
     app.set_timeout(2000, debug_1)
 
 class PasswordTest:
-    def __init__(self, text, func, score, delayed=False):
+    def __init__(self, text, func, score, char_count, delayed=False):
         self.text = text
         self.func = func
         self.score = score
         self.icon = None
+        self.char_count = char_count
         self.delayed = delayed
         self.disabled = False 
 
@@ -230,22 +260,22 @@ class PaswordDescription:
 
 # Create checkboxes
 password_tests = [
-  PasswordTest("Length >= 8",                          check_length_8,    5),
-  PasswordTest("Length >= 12",                         check_length_12,  10),
-  PasswordTest("Contains upper and lowercase letters", check_case,       10),
-  PasswordTest("Contains numbers",                     check_num,        10),
-  PasswordTest("Contains symbols",                     check_symbol,     10),
-  PasswordTest("Not based on a dictionary word",       check_dictionary, 10),
-  PasswordTest("Hasn't been breached",                 check_breached,   10,  delayed=True),
+  PasswordTest("Length >= 8",                          check_length_8,   50,  0),
+  PasswordTest("Length >= 13",                         check_length_13,  30,  0),
+  PasswordTest("Contains upper and lowercase letters", check_case,       10, 26),
+  PasswordTest("Contains numbers",                     check_num,        10, 10),
+  PasswordTest("Contains symbols",                     check_symbol,     10, 32),
+  PasswordTest("Not based on a dictionary word",       check_dictionary, 50,  0),
+  PasswordTest("Hasn't been breached",                 check_breached,   30,  0, delayed=True),
 ]
 test_password_checks()
 
 password_descriptions = [
-    PaswordDescription("Very weak",    20, 'red'),
-    PaswordDescription("Weak",         40, 'orange'),
-    PaswordDescription("Fair",         60, 'yellow'),
-    PaswordDescription("Strong",       80, 'lightgreen'),
-    PaswordDescription("Very strong", 100, 'green')
+    PaswordDescription("Very weak",    50, '#ff0000'),
+    PaswordDescription("Weak",         70, '#ff4000'),
+    PaswordDescription("Fair",         80, '#ff7000'),
+    PaswordDescription("Strong",       95, '#008000'),
+    PaswordDescription("Very strong", 100, '#08ae00')
 ]
 
 # Initialize window
@@ -303,11 +333,12 @@ strength_grid.set_grid(2, 2)
 lbl = gp.StyleLabel(strength_grid, 'Password Strength:')
 lbl.font_weight = 'bold'
 strength_lbl = gp.StyleLabel(strength_grid, '')
+strength_lbl.font_weight = 'bold'
 
 strength_grid.add(lbl, 1, 1, align='left')
 strength_grid.add(strength_lbl, 1, 2, align='left')
 
-lbl = gp.StyleLabel(strength_grid, 'Brute force guesses:')
+lbl = gp.StyleLabel(strength_grid, 'Time to crack:')
 lbl.font_weight = 'bold'
 guesses_lbl = gp.Label(strength_grid, '')
 
@@ -335,9 +366,5 @@ progress_cont.add(info_img, 1, 2,align='center')
 
 row +=1
 app.add(progress_cont, row, 1, fill=True)
-
-debug_btn = gp.Button(app, 'Test', debug)
-row +=1
-app.add(debug_btn, row, 1, align='center')
 
 app.run()
