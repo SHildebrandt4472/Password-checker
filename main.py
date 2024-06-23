@@ -285,8 +285,22 @@ app.set_grid(6, 1)
 
 row = 1
 
-name_lbl = gp.Label(app, 'Enter your password')
-app.add(name_lbl, row, 1, align='left')
+title_cont = gp.Container(app)
+title_cont.set_grid(2, 2)
+title_cont.set_column_weights(1, 0)
+
+title_lbl = gp.StyleLabel(title_cont, 'Hilda Hack')
+title_lbl.font_size = 15
+title_lbl.font_weight = 'bold'
+title_cont.add(title_lbl, 1, 1, align='left')
+
+logo = gp.Image(title_cont, 'images/logo.png')
+title_cont.add(logo, 1, 2, align='right',row_span=2, valign='middle')
+
+name_lbl = gp.Label(title_cont, 'Enter your password')
+title_cont.add(name_lbl, 2, 1, align='left')
+
+app.add(title_cont, row, 1, fill=True)
 
 password_con = gp.Container(app) 
 password_con.set_grid(1, 3)
@@ -312,7 +326,7 @@ copy_img.add_event_listener('mouse_over', hover_copy)
 
 password_con.add(copy_img, 1, 3, align='center')
 
-app.add(password_con, row, 1, align='left')
+app.add(password_con, row, 1, align='left', margins = [0, 15, 0, 15])
 
 # Create checkboxes
 checkbox_grid = gp.Container(app) 
@@ -327,6 +341,9 @@ for test in password_tests:
 
 row += 1
 app.add(checkbox_grid, row, 1, align='left')
+
+row += 1
+app.add(gp.Separator(app, 'horizontal'), row, 1)
 
 strength_grid = gp.Container(app)
 strength_grid.set_grid(2, 2)
