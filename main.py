@@ -5,6 +5,7 @@ import pyhibp
 from pyhibp import pwnedpasswords as pw
 from dict import load_word_list, word_exists
 import pyperclip
+from info_window import InfoWindow
 
 app = gp.GooeyPieApp('Hello!')
 
@@ -38,7 +39,19 @@ def copy(event):
     if password_inp.text == '':
         return
     pyperclip.copy(password_inp.text)
-    copy_img.image = 'images/clipboard_tick.png'
+    copy_img.image = 'images/clipboard_tick_hover.png'
+
+def unhover_copy(event):
+    if copy_img.image == 'images/clipboard_tick_hover.png':
+        copy_img.image = 'images/clipboard_tick.png'
+    if copy_img.image == 'images/clipboard_hover.png':
+        copy_img.image = 'images/clipboard.png'
+
+def hover_copy(event):
+    if copy_img.image == 'images/clipboard_tick.png':
+        copy_img.image = 'images/clipboard_tick_hover.png'
+    if copy_img.image == 'images/clipboard.png':
+        copy_img.image = 'images/clipboard_hover.png'
 
 def reveal(event):
     password_inp.unmask()
@@ -46,31 +59,38 @@ def reveal(event):
 def hide(event):
     password_inp.mask()
 
-def show_img_click(event):
+def show_eye_click(event):
     global password_hidden
     if password_hidden:
         password_hidden = False
         password_inp.unmask()
-        show_img.image = 'images/eye_open_hover.png'
+        show_eye.image = 'images/eye_open_hover.png'
     else:
         password_hidden = True
         password_inp.mask()
-        show_img.image = 'images/eye_closed_hover.png'
+        show_eye.image = 'images/eye_closed_hover.png'
 
-def show_img_hover(event):
+def show_eye_hover(event):
+    
     if password_hidden:
-        show_img.image = 'images/eye_closed_hover.png'
+        show_eye.image = 'images/eye_closed_hover.png'
     else:
-        show_img.image = 'images/eye_open_hover.png'
+        show_eye.image = 'images/eye_open_hover.png'
 
-def show_img_mouse_out(event):
+def show_eye_mouse_out(event):
     if password_hidden:
-        show_img.image = 'images/eye_closed.png'
+        show_eye.image = 'images/eye_closed.png'
     else:
-        show_img.image = 'images/eye_open.png'
+        show_eye.image = 'images/eye_open.png'
 
 def more_info(event):
-    pass
+    InfoWindow(app).show_on_top()
+
+def more_info_hover(event):
+    info_img.image = 'images/info_hover.png'
+
+def more_info_unhover(event):
+    info_img.image = 'images/info.png'
 
 def check_length_8(password):
     if len(password) >= 8:
@@ -172,6 +192,14 @@ def check_password(event):
         else:
             test.icon.image = 'images/cross.png'
     strength_pb.value = 100/score_total * score
+    if len(pw) >0:
+        for desc in password_descriptions:
+            if strength_pb.value <= desc.score:
+                strength_lbl.text = desc.text
+                strength_lbl.color = desc.colour
+                break
+    else:
+        strength_lbl.text = ''
 
 def password_changed(event):
     global delay_timer
@@ -194,18 +222,31 @@ class PasswordTest:
         self.delayed = delayed
         self.disabled = False 
 
+class PaswordDescription:
+    def __init__(self, text, score, colour):
+        self.text = text
+        self.score = score
+        self.colour = colour
+
 # Create checkboxes
 password_tests = [
-  PasswordTest("Length >= 8", check_length_8, 5),
-  PasswordTest("Length >= 12", check_length_12, 10),
-  PasswordTest("Contains upper and lowercase letters", check_case, 10),
-  PasswordTest("Contains numbers", check_num, 10),
-  PasswordTest("Contains symbols", check_symbol, 10),
-  PasswordTest("Not based on a dictionary word", check_dictionary, 10),
-  PasswordTest("Hasn't been breached", check_breached, 10, delayed=True),
+  PasswordTest("Length >= 8",                          check_length_8,    5),
+  PasswordTest("Length >= 12",                         check_length_12,  10),
+  PasswordTest("Contains upper and lowercase letters", check_case,       10),
+  PasswordTest("Contains numbers",                     check_num,        10),
+  PasswordTest("Contains symbols",                     check_symbol,     10),
+  PasswordTest("Not based on a dictionary word",       check_dictionary, 10),
+  PasswordTest("Hasn't been breached",                 check_breached,   10,  delayed=True),
 ]
 test_password_checks()
 
+password_descriptions = [
+    PaswordDescription("Very weak",    20, 'red'),
+    PaswordDescription("Weak",         40, 'orange'),
+    PaswordDescription("Fair",         60, 'yellow'),
+    PaswordDescription("Strong",       80, 'lightgreen'),
+    PaswordDescription("Very strong", 100, 'green')
+]
 
 # Initialize window
 
@@ -226,16 +267,18 @@ password_inp.add_event_listener('change', password_changed)
 row += 1
 password_con.add(password_inp, 1, 1, align='left')
 
-show_img = gp.Image(password_con, 'images/eye_closed.png')
+show_eye = gp.Image(password_con, 'images/eye_closed.png')
 password_hidden = True
-show_img.add_event_listener('mouse_down', show_img_click)
-show_img.add_event_listener('mouse_over', show_img_hover)
-show_img.add_event_listener('mouse_out', show_img_mouse_out)
+show_eye.add_event_listener('mouse_down', show_eye_click)
+show_eye.add_event_listener('mouse_over', show_eye_hover)
+show_eye.add_event_listener('mouse_out', show_eye_mouse_out)
 
-password_con.add(show_img, 1, 2, align='center', valign='middle')
+password_con.add(show_eye, 1, 2, align='center', valign='middle')
 
 copy_img = gp.Image(password_con, 'images/clipboard.png')
 copy_img.add_event_listener('mouse_down', copy)
+copy_img.add_event_listener('mouse_out', unhover_copy)
+copy_img.add_event_listener('mouse_over', hover_copy)
 
 password_con.add(copy_img, 1, 3, align='center')
 
@@ -255,9 +298,25 @@ for test in password_tests:
 row += 1
 app.add(checkbox_grid, row, 1, align='left')
 
-strength_lbl = gp.Label(app, '')
+strength_grid = gp.Container(app)
+strength_grid.set_grid(2, 2)
+lbl = gp.StyleLabel(strength_grid, 'Password Strength:')
+lbl.font_weight = 'bold'
+strength_lbl = gp.StyleLabel(strength_grid, '')
+
+strength_grid.add(lbl, 1, 1, align='left')
+strength_grid.add(strength_lbl, 1, 2, align='left')
+
+lbl = gp.StyleLabel(strength_grid, 'Brute force guesses:')
+lbl.font_weight = 'bold'
+guesses_lbl = gp.Label(strength_grid, '')
+
+strength_grid.add(lbl, 2, 1, align='left')
+strength_grid.add(guesses_lbl, 2, 2, align='left')
+
+
 row +=1
-app.add(strength_lbl, row, 1, align='left')
+app.add(strength_grid, row, 1, align='left')
 
 progress_cont =gp.Container(app)
 progress_cont.set_grid(1, 2)
@@ -269,6 +328,8 @@ progress_cont.add(strength_pb, 1, 1, fill=True)
 
 info_img = gp.Image(progress_cont, 'images/info.png')
 info_img.add_event_listener('mouse_down', more_info)
+info_img.add_event_listener('mouse_over', more_info_hover)
+info_img.add_event_listener('mouse_out', more_info_unhover)
 info_img.width = 30
 progress_cont.add(info_img, 1, 2,align='center')
 
