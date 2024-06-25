@@ -6,8 +6,8 @@ def load_word_list():
             word = line.strip().lower()
             length = len(word)
             if length not in word_list:
-                word_list[length] = []
-            word_list[length].append(word)
+                word_list[length] = set()  # Use a SET to make lookups faster
+            word_list[length].add(word)
 
 
 def word_exists(word):

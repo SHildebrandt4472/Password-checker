@@ -2,8 +2,9 @@ import gooeypie as gp
 
 class InfoWindow(gp.Window):
     def __init__(self,parent):
-        super().__init__(parent, 'Test Window')
+        super().__init__(parent, 'Information')
         self.width = 300
+        self.set_resizable(False)
         self.set_grid(9, 2)
 
         # Title

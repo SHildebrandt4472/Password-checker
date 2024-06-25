@@ -154,6 +154,7 @@ if __name__ == '__main__':
     app = gp.GooeyPieApp('Hilda Hack')    
     app.width = 250
     app.height = 400    
+    app.set_resizable(False)
     app.on_open(on_app_open)
     app.set_icon('images/fav_logo.png')
 
