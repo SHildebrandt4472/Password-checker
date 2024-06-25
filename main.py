@@ -77,7 +77,11 @@ def more_info_unhover(event):
 
 def brute_force_time(possibilites):
     # Assume 1 billion guesses per second
-    seconds = possibilites / 1000000000
+    try:
+        seconds = possibilites / 1000000000
+    except:
+        return 'Not in your lifetime'
+    
     minutes = seconds / 60
     hours = minutes / 60
     days = hours / 24
