@@ -7,44 +7,46 @@ from password_descriptions import password_descriptions
 # Global timer variable to delay checking password after user input
 delay_timer = 0
 
-def timertick():
+def timertick(): # Called every 100ms
     global delay_timer
     if delay_timer > 0:
         delay_timer -= 1
-        if delay_timer == 0:
+        if delay_timer == 0: # If timer reaches 0, check password
             check_password(None)
 
 def on_app_open():
-    app.set_interval(100, timertick)
+    app.set_interval(100, timertick) # Start timer on startup
     check_password(None)  # Initialize icons
 
 def copy(event):
-    if password_inp.text == '':
+    if password_inp.text == '': # Don't copy if password is empty
         return
-    pyperclip.copy(password_inp.text)
+    pyperclip.copy(password_inp.text) # Copy password to clipboard
     copy_img.image = 'images/clipboard_tick_hover.png'
 
 def unhover_copy(event):
+    # Change image to unhover image with corrected ticked image
     if copy_img.image == 'images/clipboard_tick_hover.png':
         copy_img.image = 'images/clipboard_tick.png'
     if copy_img.image == 'images/clipboard_hover.png':
         copy_img.image = 'images/clipboard.png'
 
 def hover_copy(event):
+    # Change image to hover image with corrected ticked image
     if copy_img.image == 'images/clipboard_tick.png':
         copy_img.image = 'images/clipboard_tick_hover.png'
     if copy_img.image == 'images/clipboard.png':
         copy_img.image = 'images/clipboard_hover.png'
 
 def reveal(event):
-    password_inp.unmask()
+    password_inp.unmask() # Show the password input text
 
 def hide(event):
-    password_inp.mask()
+    password_inp.mask() # Hide the password input text
 
 def show_eye_click(event):
     global password_hidden
-    if password_hidden:
+    if password_hidden: # Toggle password visibility plus change open vs close eye
         password_hidden = False
         password_inp.unmask()
         show_eye.image = 'images/eye_open_hover.png'
@@ -54,26 +56,27 @@ def show_eye_click(event):
         show_eye.image = 'images/eye_closed_hover.png'
 
 def show_eye_hover(event):
-    
+    # Change eye image to hover image
     if password_hidden:
         show_eye.image = 'images/eye_closed_hover.png'
     else:
         show_eye.image = 'images/eye_open_hover.png'
 
 def show_eye_mouse_out(event):
+    # Change eye image to normal image
     if password_hidden:
         show_eye.image = 'images/eye_closed.png'
     else:
         show_eye.image = 'images/eye_open.png'
 
 def more_info(event):
-    InfoWindow(app).show_on_top()
+    InfoWindow(app).show_on_top() # Open the info window
 
 def more_info_hover(event):
-    info_img.image = 'images/info_hover.png'
+    info_img.image = 'images/info_hover.png' # Change image to hover image
 
 def more_info_unhover(event):
-    info_img.image = 'images/info.png'
+    info_img.image = 'images/info.png' # Change image to normal image
 
 def brute_force_time(possibilites):
     # Assume 1 billion guesses per second
@@ -82,11 +85,13 @@ def brute_force_time(possibilites):
     except:
         return 'Not in your lifetime'
     
+    # Units of time
     minutes = seconds / 60
     hours = minutes / 60
     days = hours / 24
     years = days / 365
     
+    # Return the time in the appropriate unit
     if minutes < 1:
         return 'Instantly'    
     elif hours < 1:
@@ -101,19 +106,19 @@ def brute_force_time(possibilites):
         return 'Not in your lifetime'
 
 def check_password(event):
-    pw = password_inp.text
+    password = password_inp.text
     score = 0
     score_total = 0
     max_chars = 26
 
-    for test in password_tests:
+    for test in password_tests: # Loop through all tests at add up scores
         score_total += test.score
 
         if test.disabled:
             test.icon.image = 'images/disabled.png'
             continue  # Skip tests if disabled
 
-        if len(pw) == 0:
+        if len(password) == 0:
             test.icon.image = 'images/dash.png'
             continue  # Skip tests if password is empty
 
@@ -121,40 +126,44 @@ def check_password(event):
             test.icon.image = 'images/dash.png'
             continue  # Skip test if delayed
 
-        ok = test.func(pw)
-        if ok:
+        ok = test.func(password)
+        if ok:  # If test passes, add score and change icon
             test.icon.image = 'images/tick.png'
             score += test.score
             max_chars += test.char_count
-        else:
+        else:  # If test fails, change icon
             test.icon.image = 'images/cross.png'
-    strength_pb.value = 100/score_total * score    
+    strength_pb.value = 100/score_total * score  # Calculate password strength   
 
-    if len(pw) >0:
-        for desc in password_descriptions:
+    if len(password) >0:
+        for desc in password_descriptions: # Look up decription based on score value
             if strength_pb.value <= desc.score:
                 strength_lbl.text = desc.text
                 strength_lbl.color = desc.colour
-                break
-        guesses_lbl.text = brute_force_time(max_chars ** len(pw))
-    else:
+                break 
+
+        guesses_lbl.text = brute_force_time(max_chars ** len(password)) # Calculate time to crack password
+
+    else: # If password is empty, reset labels
         strength_lbl.text = ''
         guesses_lbl.text = ''
 
 def password_changed(event):
     global delay_timer
     delay_timer = 8 # Delay for 1 second before checking password
-    copy_img.image = 'images/clipboard.png'
-    check_password(event)
-
+    copy_img.image = 'images/clipboard.png' # Reset copy image
+    check_password(event) # Check password after user input
 
 #
-#  MAIN: App starts Here
+#  MAIN: App starts here
 #
+
+# Create the main app window
 if __name__ == '__main__':      
 
     init_password_tests()  # Initialise all tests
 
+    # Create the main app window
     app = gp.GooeyPieApp('Hilda Hack')    
     app.width = 250
     app.height = 400    
@@ -228,7 +237,8 @@ if __name__ == '__main__':
     checkbox_grid.set_grid(len(password_tests), 2) 
 
     # Add password tests to grid
-    r = 1
+
+    r = 1 # Row counter for container
     for test in password_tests:
         test.icon = gp.Image(checkbox_grid, "images/dash.png")
         label = gp.Label(checkbox_grid, test.text)
@@ -238,15 +248,11 @@ if __name__ == '__main__':
     
     app.add(checkbox_grid, row, 1, align='left')
 
-    #
     # Main Grid Row: Separator
-    #
     row += 1
     app.add(gp.Separator(app, 'horizontal'), row, 1)
 
-    #
     # Main Grid Row: Password strength grid
-    #
     row +=1
     strength_grid = gp.Container(app)
     strength_grid.set_grid(2, 2)
@@ -271,7 +277,7 @@ if __name__ == '__main__':
     strength_grid.add(guesses_lbl, 2, 2, align='left')
 
     app.add(strength_grid, row, 1, align='left')  # Add grid to app
-
+    
     #
     # Main Grid Row: Progress bar
     #
@@ -293,7 +299,6 @@ if __name__ == '__main__':
     progress_cont.add(info_img, 1, 2,align='center')
     
     app.add(progress_cont, row, 1, fill=True) # Add progress container to app
-
 
     # Open the main window and run the app
     app.run() 

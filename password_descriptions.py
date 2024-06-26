@@ -1,3 +1,4 @@
+# Create the password strength descriptions as a list of objects
 class PaswordDescription:
     def __init__(self, text, score, colour):
         self.text = text

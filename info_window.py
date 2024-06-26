@@ -2,7 +2,7 @@ import gooeypie as gp
 
 class InfoWindow(gp.Window):
     def __init__(self,parent):
-        super().__init__(parent, 'Information')
+        super().__init__(parent, 'Information') # Call the parent's init method
         self.width = 300
         self.set_resizable(False)
         self.set_grid(9, 2)
@@ -24,7 +24,7 @@ class InfoWindow(gp.Window):
                      ['Breached Password:',   "Checks against the 'Have I been pwned' list of breached passwords"],
                      ['Save to Clipboard:',   "Copy your password here. It auto-clears in 2 minutes"]]        
         row = 3
-        for info in info_text:
+        for info in info_text: # Add each feature to the window
             lbl = gp.StyleLabel(self, info[0])
             lbl.font_weight='bold'
             self.add(lbl, row, 1, align='left')
@@ -37,5 +37,6 @@ class InfoWindow(gp.Window):
         close_btn = gp.Button(self, 'Close', self.close_btn_click)
         self.add(close_btn, row, 2, align='right')
 
+    # Close button click event
     def close_btn_click(self, event):
         self.hide()
